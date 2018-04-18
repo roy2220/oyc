@@ -772,11 +772,11 @@ class Interpreter:
         if in_value.type is ValueType.FLOATING_POINT:
             out_value.assign(in_value)
         elif in_value.type is ValueType.INTEGER:
-            floating_point = int(in_value.data)
+            floating_point = float(in_value.data)
             out_value.set(ValueType.FLOATING_POINT, floating_point)
         elif in_value.type is ValueType.STRING:
             try:
-                floating_point = int(in_value.data)
+                floating_point = float(in_value.data)
             except:
                 out_value.set(ValueType.VOID, None)
             else:

@@ -66,6 +66,27 @@ trace("fn", "type:", typeof(fn), "fn(1, 2) value:", fn(1, 2));
 "fn" "type:" "closure" "fn(1, 2) value:" 2
 ```
 
+### 类型转换
+
+```
+/********** test.oyc **********/
+auto a = 1.1;
+auto b = int(a);
+auto c = float(b) / 2;
+auto d = str(100);
+auto e = int(d);
+auto f = float(d + ".1");
+auto g = bool(f);
+trace(a, b, c, d, e, f, g);
+```
+
+输出
+
+```
+❯ python3 oyc.py test.oyc
+1.1 1 0.5 "100" 100 100.1 true
+```
+
 ### 数组
 
 ```
