@@ -135,16 +135,42 @@ trace("output2:", st);
 输出
 
 ```
-❯ python3 oyc.py test.oyc    :
+❯ python3 oyc.py test.oyc
 "output1:" true
 "output2:" struct {["foo"] = 1, ["bar"] = 2, ["haha"] = "^_^"}
 "output2:" struct {["bar"] = 2, ["haha"] = "^_^"}
+```
+
+### 闭包
+
+```
+/********** test.oyc **********/
+// 变长参数支持（auto...）
+auto test = (auto arg1, auto arg2, auto... args) {
+    trace(arg1, arg2);
+
+    return () {
+        trace(args);
+    };
+};
+
+auto f = test(1,2,3,4,5);
+f();
+```
+
+输出
+
+```
+❯ python3 oyc.py test.oyc
+1 2
+[] {3, 4, 5}
 ```
 
 ### 语句
 
 ```
 /********** test.oyc **********/
+// if语句
 if (true) {
   trace("1");
 } else {
