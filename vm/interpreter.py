@@ -121,7 +121,8 @@ class Interpreter:
 
         for i in range(number_of_arguments, number_of_parameters):
             stack_pos = stack_base + i
-            default_argument = closure.default_arguments[i - number_of_arguments]
+            default_argument = closure.default_arguments\
+                               [i - function_prototype.number_of_regular_parameters]
             self._stack[stack_pos].assign(default_argument)
 
         if function_prototype.is_variadic:

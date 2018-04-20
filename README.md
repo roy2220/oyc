@@ -145,7 +145,15 @@ trace("output2:", st);
 
 ```
 /********** test.oyc **********/
-// 变长参数支持（auto...）
+// 默认参数
+auto foo = (auto a, auto b = 1, auto c = 2) {
+  trace("foo", a, b, c);
+};
+
+foo(-1);
+foo(-1, -2);
+
+// 变长参数（auto...）
 auto test = (auto arg1, auto arg2, auto... args) {
     trace(arg1, arg2);
 
@@ -161,8 +169,10 @@ f();
 输出
 
 ```
-❯ python3 oyc.py test.oyc
-1 2
+❯ python3 oyc.py test.oyc           
+"foo" -1 1 2                                 
+"foo" -1 -2 2                                
+1 2                                          
 [] {3, 4, 5}
 ```
 
@@ -244,9 +254,11 @@ default:
 "9c"
 ```
 
-### require
+### 模块
 
 ```
+// 使用require导入模块
+
 /********** test1.oyc **********/
 trace("test1's argv:", argv); // argv为命令行参数
 auto x = require("test2.oyc", "hi", "hello");
