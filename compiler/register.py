@@ -44,6 +44,12 @@ class RegisterPool:
     def find_register(self, register_name: str) -> int:
         return self._delta.find_register(register_name)
 
+    def mark_register(self, register_id: int) -> None:
+        self._delta.mark_register(register_id)
+
+    def has_marked_registers(self) -> bool:
+        return self._delta.has_marked_registers()
+
     @contextlib.contextmanager
     def save(self) -> typing.ContextManager[None]:
         delta = self._delta
@@ -59,6 +65,7 @@ class _RegisterPoolDelta:
         "_size",
         "_register_names",
         "_register_name_2_id",
+        "_has_marked_registers",
     )
 
     def __init__(self, parent: typing.Optional["_RegisterPoolDelta"], used_size: int, size: int) \
@@ -68,6 +75,7 @@ class _RegisterPoolDelta:
         self._size = size
         self._register_names = []
         self._register_name_2_id = {}
+        self._has_marked_registers = False
 
     def get_next_register_id(self) -> int:
         register_count = len(self._register_names)
@@ -106,6 +114,15 @@ class _RegisterPoolDelta:
             register_id = self._parent.find_register(register_name)
 
         return register_id
+
+    def mark_register(self, register_id: int) -> None:
+        if register_id in range(self._used_size, self._size):
+            self._has_marked_registers = True
+        else:
+            self._parent.mark_register(register_id)
+
+    def has_marked_registers(self) -> bool:
+        return self._has_marked_registers
 
 
 class RegisterStack:

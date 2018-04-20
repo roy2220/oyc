@@ -64,6 +64,7 @@ class Opcode(enum.IntEnum):
     NEW_STRUCTURE = enum.auto()
 
     NEW_CLOSURE = enum.auto()
+    KILL_ORIGINAL_CAPTURES = enum.auto()
     CALL = enum.auto()
     RETURN = enum.auto()
 

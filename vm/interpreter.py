@@ -676,6 +676,19 @@ class Interpreter:
                                      , default_arguments)
         value.set(ValueType.CLOSURE, closure)
 
+    def _execute_kill_original_captures(self, instruction_offset: int, operand1: int, operand2: int
+                                        , operand3: int, operand4: int) -> None:
+        register_id1 = operand1
+        register_ids_of_original_capture = []
+
+        for register_id2 in self._call_frame.register_id_2_original_capture.keys():
+            if register_id2 >= register_id1:
+                register_ids_of_original_capture.append(register_id2)
+
+        for register_id2 in register_ids_of_original_capture:
+            capture = self._call_frame.register_id_2_original_capture.pop(register_id2)
+            capture.value = capture.value.copy()
+
     def _execute_call(self, instruction_offset: int, operand1: int, operand2: int
                       , operand3: int, operand4: None) -> None:
         value = self._stack[self._call_frame.stack_base + operand1]
@@ -863,6 +876,7 @@ _INSTRUCTION_EXECUTORS[Opcode.JUMP_IF_FALSE] = Interpreter._execute_jump_if_fals
 _INSTRUCTION_EXECUTORS[Opcode.NEW_ARRAY] = Interpreter._execute_new_array
 _INSTRUCTION_EXECUTORS[Opcode.NEW_STRUCTURE] = Interpreter._execute_new_structure
 _INSTRUCTION_EXECUTORS[Opcode.NEW_CLOSURE] = Interpreter._execute_new_closure
+_INSTRUCTION_EXECUTORS[Opcode.KILL_ORIGINAL_CAPTURES] = Interpreter._execute_kill_original_captures
 _INSTRUCTION_EXECUTORS[Opcode.CALL] = Interpreter._execute_call
 _INSTRUCTION_EXECUTORS[Opcode.RETURN] = Interpreter._execute_return
 _INSTRUCTION_EXECUTORS[Opcode.NEW_ITERATOR] = Interpreter._execute_new_iterator

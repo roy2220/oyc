@@ -6,6 +6,8 @@ __all__ = (
 )
 
 
+import typing
+
 from .constant import *
 from .function_prototype import FunctionPrototype, SourceLocation
 from compiler.error import ConstantTableTooLargeError
@@ -20,6 +22,9 @@ class Executable:
         function_prototype_id = len(self._function_prototypes)
         self._function_prototypes.append(function_prototype)
         return function_prototype_id
+
+    def get_function_prototype_ids(self) -> typing.Sequence[int]:
+        return range(len(self._function_prototypes))
 
     def get_function_prototype(self, function_prototype_id: int) -> FunctionPrototype:
         assert function_prototype_id in range(0, len(self._function_prototypes))

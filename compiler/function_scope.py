@@ -56,7 +56,12 @@ class FunctionScope:
             if self._parent is None:
                 raise VariableNotFoundError(variable_name.source_location, variable_name.data)
 
-            self._parent.find_variable(variable_name)
+            variable_type, variable_id = self._parent.find_variable(variable_name)
+
+            if variable_type is VariableType.LOCAL:
+                register_id = variable_id
+                self._parent._add_original_capture(register_id)
+
             capture_id = self._create_foreign_variable(variable_name)
             variable_info = VariableType.FOREIGN, capture_id
 
@@ -82,6 +87,9 @@ class FunctionScope:
 
     def get_next_register_id(self) -> int:
         return self._register_pool.get_next_register_id()
+
+    def has_original_captures(self) -> bool:
+        return self._register_pool.has_marked_registers()
 
     def enter_block_scope(self) -> typing.ContextManager[None]:
         return self._register_pool.save()
@@ -117,3 +125,6 @@ class FunctionScope:
             return self._capture_table.find_capture(variable_name)
         except CaptureNotFoundException:
             return None
+
+    def _add_original_capture(self, register_id: int) -> None:
+        self._register_pool.mark_register(register_id)

@@ -40,7 +40,7 @@ class BytecodeGenerator(ASTVisitor):
         pass
 
     def visit_block_statement(self, statement: BlockStatement) -> None:
-        with self._function_scope.enter_block_scope():
+        with self._enter_block_scope(statement.source_location):
             for statement1 in statement.statements:
                 statement1.accept_visit(self)
 
@@ -117,7 +117,7 @@ class BytecodeGenerator(ASTVisitor):
     def visit_if_statement(self, statement: IfStatement) -> None:
         with contextlib.ExitStack() as stack:
             if statement.initialization is not None:
-                stack.enter_context(self._function_scope.enter_block_scope())
+                stack.enter_context(self._enter_block_scope(statement.source_location))
                 statement.initialization.accept_visit(self);
 
             statement.condition.accept_visit(self)
@@ -164,7 +164,7 @@ class BytecodeGenerator(ASTVisitor):
     def visit_switch_statement(self, statement: SwitchStatement) -> None:
         with contextlib.ExitStack() as stack:
             if statement.initialization is not None:
-                stack.enter_context(self._function_scope.enter_block_scope())
+                stack.enter_context(self._enter_block_scope(statement.source_location))
                 statement.initialization.accept_visit(self);
 
             stack.enter_context(self._enter_switch())
@@ -242,7 +242,7 @@ class BytecodeGenerator(ASTVisitor):
     def visit_while_statement(self, statement: WhileStatement) -> None:
         with contextlib.ExitStack() as stack:
             if statement.initialization is not None:
-                stack.enter_context(self._function_scope.enter_block_scope())
+                stack.enter_context(self._enter_block_scope(statement.source_location))
                 statement.initialization.accept_visit(self);
 
             stack.enter_context(self._enter_loop())
@@ -283,7 +283,7 @@ class BytecodeGenerator(ASTVisitor):
     def visit_do_while_statement(self, statement: DoWhileStatement) -> None:
         with contextlib.ExitStack() as stack:
             if statement.initialization is not None:
-                stack.enter_context(self._function_scope.enter_block_scope())
+                stack.enter_context(self._enter_block_scope(statement.source_location))
                 statement.initialization.accept_visit(self);
 
             stack.enter_context(self._enter_loop())
@@ -326,7 +326,7 @@ class BytecodeGenerator(ASTVisitor):
         with contextlib.ExitStack() as stack:
             if statement.initialization is not None:
                 if isinstance(statement.initialization, AutoStatement):
-                    stack.enter_context(self._function_scope.enter_block_scope())
+                    stack.enter_context(self._enter_block_scope(statement.source_location))
 
                 statement.initialization.accept_visit(self);
 
@@ -374,7 +374,7 @@ class BytecodeGenerator(ASTVisitor):
 
     def visit_foreach_statement(self, statement: ForeachStatement) -> None:
         with contextlib.ExitStack() as stack:
-            stack.enter_context(self._function_scope.enter_block_scope())
+            stack.enter_context(self._enter_block_scope(statement.source_location))
             register_id1 = self._function_scope.create_local_variable(statement.iterator_name1)
             register_id2 = self._function_scope.create_local_variable(statement.iterator_name2)
             statement.container.accept_visit(self)
@@ -918,11 +918,25 @@ class BytecodeGenerator(ASTVisitor):
         return function_prototype_id
 
     @contextlib.contextmanager
-    def _assign_value(self, on_off) -> typing.ContextManager[None]:
+    def _enter_block_scope(self, source_location: SourceLocation) -> typing.ContextManager[None]:
+        with self._function_scope.enter_block_scope():
+            register_id = self._function_scope.get_next_register_id()
+            yield
+
+            if self._function_scope.has_original_captures():
+                self._function_prototype.add_instruction(
+                    source_location,
+                    Opcode.KILL_ORIGINAL_CAPTURES,
+                    operand1 = register_id,
+                )
+
+    @contextlib.contextmanager
+    def _enter_switch(self) -> typing.ContextManager[None]:
         backup = self._context
 
         self._context = self._context._replace(
-            is_assigning_value = on_off,
+            break_instruction_offsets = [],
+            fallthrough_instruction_offset = [],
         )
 
         yield
@@ -941,12 +955,11 @@ class BytecodeGenerator(ASTVisitor):
         self._context = backup
 
     @contextlib.contextmanager
-    def _enter_switch(self) -> typing.ContextManager[None]:
+    def _assign_value(self, on_off) -> typing.ContextManager[None]:
         backup = self._context
 
         self._context = self._context._replace(
-            break_instruction_offsets = [],
-            fallthrough_instruction_offset = [],
+            is_assigning_value = on_off,
         )
 
         yield
