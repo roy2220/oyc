@@ -278,3 +278,25 @@ return argv[0] + argv[1]; // return将返回到require，即x
 "x=" "hihello"
 ```
 
+### eval
+
+```
+//把字符串当作脚本执行                       
+/********** test.oyc **********/             
+auto sum = eval(                             
+  "return argv[0] + argv[1];",               
+  1,                                         
+  2,                                         
+);                                           
+trace(sum);    
+```
+
+输出
+
+```
+❯ python3 oyc.py test.oyc 
+3
+```
+
+
+

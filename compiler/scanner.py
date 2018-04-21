@@ -375,6 +375,7 @@ _KEYWORD_2_BASIC_TOKEN_TYPE: typing.Dict[str, BasicTokenType] = {
     "delete": BasicTokenType.DELETE_KEYWORD,
     "do": BasicTokenType.DO_KEYWORD,
     "else": BasicTokenType.ELSE_KEYWORD,
+    "eval": BasicTokenType.EVAL_KEYWORD,
     "false": BasicTokenType.FALSE_KEYWORD,
     "float": BasicTokenType.FLOAT_KEYWORD,
     "for": BasicTokenType.FOR_KEYWORD,

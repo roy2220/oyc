@@ -1036,6 +1036,7 @@ _OPERATOR_PRECEDENCES = _OPERATOR_PRECEDENCES()
 _BUILTIN_FUNCTION_NAMES = {
     BasicTokenType.TRACE_KEYWORD,
     BasicTokenType.REQUIRE_KEYWORD,
+    BasicTokenType.EVAL_KEYWORD,
 }
 
 def _strtoull():

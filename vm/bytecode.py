@@ -155,6 +155,7 @@ def BuiltinFunctionID():
     cls = collections.namedtuple("BuiltinFunctionID", (
         "TRACE",
         "REQUIRE",
+        "EVAL",
     ))
 
     return cls._make(range(len(cls._fields)))

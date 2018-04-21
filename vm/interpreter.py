@@ -16,12 +16,7 @@ from .function_prototype import *
 from .value import *
 
 
-class CallFrame(typing.NamedTuple):
-    parent: typing.Optional["CallFrame"]
-    source_location: SourceLocation
-    closure: Closure
-    stack_base: int
-    register_id_2_original_capture: typing.Dict[int, Capture] = {}
+BuiltinFunctionImpl = typing.Callable[["Interpreter", int, typing.List[Value]], Value]
 
 
 class Interpreter:
@@ -31,16 +26,17 @@ class Interpreter:
         "_call_frame",
         "_return_value",
         "_builtin_require_impl",
+        "_builtin_eval_impl",
     )
 
-    def __init__(self, max_stack_depth: int
-                 , builtin_require_impl: typing.Callable[["Interpreter", int, typing.List[Value]]
-                                                         , Value]) -> None:
+    def __init__(self, max_stack_depth: int, builtin_require_impl: BuiltinFunctionImpl
+                 , builtin_eval_impl: BuiltinFunctionImpl) -> None:
         self._max_stack_depth = max_stack_depth
         self._stack = []
         self._call_frame = None
         self._return_value = None
         self._builtin_require_impl = builtin_require_impl
+        self._builtin_eval_impl = builtin_eval_impl
 
     def run(self, source_location: SourceLocation, executable: Executable, stack_base: int
             , arguments: typing.List[Value]) -> Value:
@@ -677,7 +673,7 @@ class Interpreter:
         value.set(ValueType.CLOSURE, closure)
 
     def _execute_kill_original_captures(self, instruction_offset: int, operand1: int, operand2: int
-                                        , operand3: int, operand4: int) -> None:
+                                        , operand3: int, operand4: None) -> None:
         register_id1 = operand1
         register_ids_of_original_capture = []
 
@@ -757,6 +753,10 @@ class Interpreter:
                          , arguments: typing.List[Value]) -> Value:
         return self._builtin_require_impl(self, source_location, stack_base, arguments)
 
+    def _builtin_eval(self, source_location: SourceLocation, stack_base: int
+                         , arguments: typing.List[Value]) -> Value:
+        return self._builtin_eval_impl(self, source_location, stack_base, arguments)
+
     def _conversion_bool(self, in_value: Value, out_value: Value) -> bool:
         if in_value.type is ValueType.VOID:
             return False
@@ -828,6 +828,14 @@ class Interpreter:
     def _get_source_location(self, instruction_offset: int) -> SourceLocation:
         return self._call_frame.closure.get_function_prototype()\
                                        .get_source_location(instruction_offset)
+
+
+class CallFrame(typing.NamedTuple):
+    parent: typing.Optional["CallFrame"]
+    source_location: SourceLocation
+    closure: Closure
+    stack_base: int
+    register_id_2_original_capture: typing.Dict[int, Capture] = {}
 
 
 _INSTRUCTION_EXECUTORS: typing.List[typing.Callable[
@@ -902,3 +910,4 @@ _BUILTIN_FUNCTIONS: typing.List[BuiltinFunction] = len(BuiltinFunctionID._fields
 
 _BUILTIN_FUNCTIONS[BuiltinFunctionID.TRACE] = BuiltinFunction(Interpreter._builtin_trace)
 _BUILTIN_FUNCTIONS[BuiltinFunctionID.REQUIRE] = BuiltinFunction(Interpreter._builtin_require)
+_BUILTIN_FUNCTIONS[BuiltinFunctionID.EVAL] = BuiltinFunction(Interpreter._builtin_eval)

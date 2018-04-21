@@ -615,6 +615,7 @@ class BytecodeGenerator(ASTVisitor):
                 operand2 = {
                     BasicTokenType.TRACE_KEYWORD: BuiltinFunctionID.TRACE,
                     BasicTokenType.REQUIRE_KEYWORD: BuiltinFunctionID.REQUIRE,
+                    BasicTokenType.EVAL_KEYWORD: BuiltinFunctionID.EVAL,
                 }[expression.data],
             )
         else:

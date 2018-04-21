@@ -34,6 +34,7 @@ class BasicTokenType(enum.IntEnum):
     DELETE_KEYWORD = enum.auto()
     DO_KEYWORD = enum.auto()
     ELSE_KEYWORD = enum.auto()
+    EVAL_KEYWORD = enum.auto()
     FALSE_KEYWORD = enum.auto()
     FLOAT_KEYWORD = enum.auto()
     FOREACH_KEYWORD = enum.auto()
